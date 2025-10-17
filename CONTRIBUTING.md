@@ -86,4 +86,4 @@ We strive for consistent and readable code. Please adhere to the following guide
 
 ## License
 
-By contributing to `pdf-xss-checker`, you agree that your contributions will be licensed under the MIT License, as specified in the `LICENSE` file. 
+By contributing to `pdf-xss-checker`, you agree that your contributions will be licensed under the MIT License, as specified in the `LICENSE` file.
