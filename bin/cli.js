@@ -9,7 +9,7 @@ const path = require('path');
 const { program } = require('commander');
 const chalk = require('chalk');
 const ora = require('ora');
-const { scanPdfFile } = require('../src/index');
+const { scanPdf } = require('../src/index');
 const package = require('../package.json');
 
 // Configure the CLI
@@ -42,7 +42,7 @@ program
         includeGrouped: options.includeGrouped
       };
       
-      const results = await scanPdfFile(file, scanOptions);
+      const results = await scanPdf(file, scanOptions);
       
       // Handle scan results
       if (!results.success) {

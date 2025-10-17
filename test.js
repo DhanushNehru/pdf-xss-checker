@@ -13,12 +13,19 @@ async function runTests() {
     // Test 1: Malicious PDF
     console.log('Test 1: Scanning malicious PDF');
     const result1 = await pdfXssScanner.scanBuffer(maliciousPdfContent);
-    console.log('Result:', result1 ? 'XSS DETECTED ❌' : 'NO XSS DETECTED ✅');
+    console.log('Result object:', JSON.stringify(result1, null, 2));
+    console.log('Result:', result1.vulnerabilities && result1.vulnerabilities.length > 0 ? 'XSS DETECTED ❌' : 'NO XSS DETECTED ✅');
+    if (result1.vulnerabilities && result1.vulnerabilities.length > 0) {
+        console.log('Vulnerabilities found:', result1.vulnerabilities.length);
+    }
 
     // Test 2: Clean PDF
     console.log('\nTest 2: Scanning clean PDF');
     const result2 = await pdfXssScanner.scanBuffer(cleanPdfContent);
-    console.log('Result:', result2 ? 'XSS DETECTED ❌' : 'NO XSS DETECTED ✅');
+    console.log('Result:', result2.vulnerabilities && result2.vulnerabilities.length > 0 ? 'XSS DETECTED ❌' : 'NO XSS DETECTED ✅');
+    if (result2.vulnerabilities && result2.vulnerabilities.length > 0) {
+        console.log('Vulnerabilities found:', result2.vulnerabilities.length);
+    }
 }
 
 runTests().catch(console.error);

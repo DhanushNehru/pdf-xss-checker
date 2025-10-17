@@ -56,8 +56,10 @@ describe('JavaScript Injection Detector', () => {
     const results = detectJsInjection(content);
     
     expect(results.length).toBeGreaterThan(0);
-    expect(results[0].name).toBe('Execute Menu Item');
-    expect(results[0].severity).toBe('critical');
+    // Should find both Acrobat API Call and Execute Menu Item
+    const executeMenuItem = results.find(r => r.name === 'Execute Menu Item');
+    expect(executeMenuItem).toBeDefined();
+    expect(executeMenuItem.severity).toBe('critical');
   });
   
   test('should include context in results', () => {
@@ -89,7 +91,7 @@ describe('Form Injection Detector', () => {
   
   test('should detect PDF form structures', () => {
     const content = '/AcroForm << /Fields [] >>';
-    const results = detectFormInjection(content);
+    const results = detectFormInjection(content, { threshold: 'low' });
     
     expect(results.length).toBeGreaterThan(0);
     expect(results[0].name).toBe('AcroForm Structure');
