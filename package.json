@@ -7,10 +7,11 @@
     "pdf-xss-check": "./bin/cli.js"
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest --testPathIgnorePatterns=test.js",
     "lint": "eslint src/**/*.js",
     "start": "node src/index.js",
-    "cli": "node bin/cli.js"
+    "cli": "node bin/cli.js",
+    "demo": "node test.js"
   },
   "keywords": [
     "pdf",

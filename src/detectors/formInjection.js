@@ -26,7 +26,7 @@ const FORM_INJECTION_PATTERNS = [
     severity: 'low'
   },
   {
-    pattern: /\/AcroForm/gi,
+    pattern: /\/AcroForm\s*<<\s*\/Fields/gi,
     name: 'AcroForm Structure',
     description: 'Found AcroForm dictionary structure',
     severity: 'low'
