@@ -1,0 +1,35 @@
+name: Example PDF Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *" # Runs nightly at midnight UTC
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build Docker image
+        run: docker build -t pdf-xss-checker-example -f docker/Dockerfile .
+
+      - name: Generate sample PDFs
+        run: npm run generate-samples
+
+      - name: Run scanner on sample PDFs
+        run: |
+          docker run --rm -v "${{ github.workspace }}/examples:/examples" pdf-xss-checker-example node src/index.js /examples/sample1.pdf
+          docker run --rm -v "${{ github.workspace }}/examples:/examples" pdf-xss-checker-example node src/index.js /examples/sample2.pdf
