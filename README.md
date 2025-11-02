@@ -1,5 +1,7 @@
 # PDF XSS Checker
 
+[![npm version](https://img.shields.io/npm/v/pdf-xss-checker.svg?color=blue)](https://www.npmjs.com/package/pdf-xss-checker)
+
 A Node.js package to verify if PDFs contain XSS (Cross-Site Scripting) vulnerabilities.
 
 ## Installation
