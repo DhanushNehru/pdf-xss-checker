@@ -1,0 +1,44 @@
+# Development files
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# Testing
+test/
+.nyc_output/
+coverage/
+*.test.js
+
+# Documentation
+CONTRIBUTING.md
+BUG_FIXES_REPORT.md
+examples/
+
+# Build and environment files
+.eslintrc.js
+.env
+.env.local
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.github/
+.gitignore
+
+# Package manager files
+package-lock.json
+yarn.lock
+
+# Miscellaneous
+.editorconfig
+.prettierrc
+tsconfig.json
