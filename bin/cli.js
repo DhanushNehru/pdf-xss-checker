@@ -28,12 +28,6 @@ program
     const spinner = ora('Scanning PDF for XSS vulnerabilities...').start();
     
     try {
-      // Validate file exists
-      if (!fs.existsSync(file)) {
-        spinner.fail(`File not found: ${file}`);
-        process.exit(1);
-      }
-      
       // Scan the PDF
       const scanOptions = {
         threshold: options.threshold,

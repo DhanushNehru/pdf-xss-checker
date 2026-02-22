@@ -71,13 +71,8 @@ describe('PDF Scanner', () => {
   });
   
   test('should handle errors gracefully', async () => {
-    // Force an error in pdf-parse
-    require('pdf-parse').mockImplementationOnce(() => {
-      return Promise.reject(new Error('PDF parsing failed'));
-    });
-    
-    const buffer = Buffer.from('pdf content');
-    const results = await scanPdfBuffer(buffer);
+    // Pass null to trigger an error in the buffer check
+    const results = await scanPdfBuffer(null);
     
     expect(results.success).toBe(false);
     expect(results.error).toBeTruthy();

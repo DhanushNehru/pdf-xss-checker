@@ -57,6 +57,8 @@ const XSS_PATTERNS = [
   }
 ];
 
+const { calculateLineOffsets, getPositionFromOffset } = require('../utils');
+
 /**
  * Detect XSS patterns in the extracted PDF text
  * @param {string} content - Extracted PDF text content
@@ -79,6 +81,8 @@ const detectXssPatterns = (content, options = {}) => {
     severityFilter.includes(pattern.severity)
   );
 
+  const lineOffsets = options.lineOffsets || calculateLineOffsets(content);
+
   // Check each pattern against the content
   patternsToCheck.forEach(patternDef => {
     const matches = [...content.matchAll(patternDef.pattern)];
@@ -89,10 +93,7 @@ const detectXssPatterns = (content, options = {}) => {
       const endIndex = startIndex + matchedText.length;
       
       // Calculate line and column positions (approximate)
-      const contentBeforeMatch = content.substring(0, startIndex);
-      const lines = contentBeforeMatch.split('\n');
-      const lineNumber = lines.length;
-      const columnNumber = lines[lines.length - 1].length + 1;
+      const { line: lineNumber, column: columnNumber } = getPositionFromOffset(lineOffsets, startIndex);
       
       // Get context (text before and after the match)
       const contextStart = Math.max(0, startIndex - 20);

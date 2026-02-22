@@ -65,7 +65,52 @@ const getAllPatterns = () => {
  * @returns {boolean} Whether pattern matches
  */
 const hasPattern = (pattern, content) => {
-  return pattern.test(content);
+  // Clone the regex to avoid mutating lastIndex on the original pattern
+  const safePattern = new RegExp(pattern.source, pattern.flags);
+  return safePattern.test(content);
+};
+
+/**
+ * Pre-calculate line offsets for fast line/column lookups
+ * @param {string} content - The text content
+ * @returns {number[]} Array of indices where newlines occur
+ */
+const calculateLineOffsets = (content) => {
+  const offsets = [0]; // First line starts at index 0
+  for (let i = 0; i < content.length; i++) {
+    if (content[i] === '\n') {
+      offsets.push(i + 1);
+    }
+  }
+  return offsets;
+};
+
+/**
+ * Get line and column number from a character index using binary search
+ * @param {number[]} offsets - Array of newline indices from calculateLineOffsets
+ * @param {number} index - The character index to look up
+ * @returns {Object} Object containing line and column (1-based)
+ */
+const getPositionFromOffset = (offsets, index) => {
+  let low = 0;
+  let high = offsets.length - 1;
+  
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (offsets[mid] <= index) {
+      if (mid === offsets.length - 1 || offsets[mid + 1] > index) {
+        return {
+          line: mid + 1,
+          column: index - offsets[mid] + 1
+        };
+      }
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+  
+  return { line: 1, column: index + 1 };
 };
 
 module.exports = {
@@ -73,5 +118,7 @@ module.exports = {
   formatSize,
   truncateText,
   getAllPatterns,
-  hasPattern
+  hasPattern,
+  calculateLineOffsets,
+  getPositionFromOffset
 };

@@ -6,6 +6,8 @@ const pdfParse = require('pdf-parse');
 const { detectXssPatterns } = require('./detectors/xssPatterns');
 const { detectJsInjection } = require('./detectors/jsInjection');
 const { detectFormInjection } = require('./detectors/formInjection');
+const { calculateLineOffsets } = require('./utils');
+const workerPool = require('./workerPool');
 
 /**
  * Scan a PDF buffer for XSS vulnerabilities
@@ -14,7 +16,37 @@ const { detectFormInjection } = require('./detectors/formInjection');
  * @returns {Promise<Object>} Scan results
  */
 const scanPdfBuffer = async (pdfBuffer, options = {}) => {
+  // If running in test environment, use synchronous execution
+  // This is required because Jest mocks (like pdf-parse) don't propagate to worker threads
+  if (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID) {
+    return scanPdfBufferSync(pdfBuffer, options);
+  }
+
   try {
+    if (!pdfBuffer) {
+      throw new Error('PDF buffer is required');
+    }
+    return await workerPool.runTask(pdfBuffer, options);
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+      vulnerabilities: [],
+      safeToUse: false
+    };
+  }
+};
+
+/**
+ * Synchronous scan implementation
+ * Used for testing or when workers are disabled
+ */
+const scanPdfBufferSync = async (pdfBuffer, options = {}) => {
+  try {
+    if (!pdfBuffer) {
+      throw new Error('PDF buffer is required');
+    }
+
     // Set default options
     const scanOptions = {
       maxContentLength: options.maxContentLength || 10000000, // 10MB
@@ -24,9 +56,29 @@ const scanPdfBuffer = async (pdfBuffer, options = {}) => {
     };
 
     // Parse the PDF
-    const data = await pdfParse(pdfBuffer, {
-      max: scanOptions.maxContentLength
-    });
+    let data;
+    try {
+      data = await pdfParse(pdfBuffer, {
+        max: scanOptions.maxContentLength
+      });
+    } catch (parseError) {
+      // If parsing fails, we still want to scan the raw buffer
+      data = {
+        info: {},
+        numpages: 0,
+        text: ''
+      };
+    }
+
+    // Convert buffer to string for raw scanning (careful with large buffers)
+    const rawContent = pdfBuffer ? pdfBuffer.toString('binary') : '';
+
+    // Combine extracted text and raw content for comprehensive scanning
+    const contentToScan = data.text + '\n---RAW_PDF_CONTENT---\n' + rawContent;
+
+    // Pre-calculate line offsets once for all detectors
+    const lineOffsets = calculateLineOffsets(contentToScan);
+    scanOptions.lineOffsets = lineOffsets;
 
     // Initialize scan results
     const scanResults = {
@@ -34,25 +86,25 @@ const scanPdfBuffer = async (pdfBuffer, options = {}) => {
       metadata: {
         info: data.info,
         pageCount: data.numpages,
-        contentLength: data.text.length
+        contentLength: contentToScan.length
       },
       vulnerabilities: [],
-      rawContent: scanOptions.includeRawContent ? data.text : undefined
+      rawContent: scanOptions.includeRawContent ? contentToScan : undefined
     };
 
     // Run enabled detectors
     if (scanOptions.detectors.includes('xss')) {
-      const xssVulnerabilities = detectXssPatterns(data.text, scanOptions);
+      const xssVulnerabilities = detectXssPatterns(contentToScan, scanOptions);
       scanResults.vulnerabilities.push(...xssVulnerabilities);
     }
 
     if (scanOptions.detectors.includes('js')) {
-      const jsVulnerabilities = detectJsInjection(data.text, scanOptions);
+      const jsVulnerabilities = detectJsInjection(contentToScan, scanOptions);
       scanResults.vulnerabilities.push(...jsVulnerabilities);
     }
 
     if (scanOptions.detectors.includes('form')) {
-      const formVulnerabilities = detectFormInjection(data.text, scanOptions);
+      const formVulnerabilities = detectFormInjection(contentToScan, scanOptions);
       scanResults.vulnerabilities.push(...formVulnerabilities);
     }
 
@@ -89,6 +141,7 @@ const calculateRiskLevel = (vulnerabilities) => {
   if (severityCounts.medium > 0) return 'medium';
   return 'low';
 };
+
 
 module.exports = {
   scanPdfBuffer

@@ -48,8 +48,52 @@ const JS_INJECTION_PATTERNS = [
     name: 'Shell Command',
     description: 'Found potential shell command execution',
     severity: 'critical'
+  },
+  {
+    pattern: /\/JavaScript/gi,
+    name: 'PDF JavaScript Dictionary',
+    description: 'Found /JavaScript dictionary which indicates embedded scripts',
+    severity: 'high'
+  },
+  {
+    pattern: /\/JS\s*(?:<|\[|\()/gi,
+    name: 'PDF JS Entry',
+    description: 'Found /JS entry which contains JavaScript code',
+    severity: 'high'
+  },
+  {
+    pattern: /\/OpenAction/gi,
+    name: 'PDF OpenAction',
+    description: 'Found /OpenAction which can execute scripts on open',
+    severity: 'medium'
+  },
+  {
+    pattern: /\/AA\s*<</gi,
+    name: 'PDF Additional Actions',
+    description: 'Found /AA (Additional Actions) which can execute scripts on events',
+    severity: 'medium'
+  },
+  {
+    pattern: /\/URI\s*\([^)]*javascript:/gi,
+    name: 'PDF JavaScript URI',
+    description: 'Found javascript: URI in PDF link',
+    severity: 'high'
+  },
+  {
+    pattern: /\/Launch/gi,
+    name: 'PDF Launch Action',
+    description: 'Found /Launch action which can execute external programs',
+    severity: 'critical'
+  },
+  {
+    pattern: /\/RichMedia/gi,
+    name: 'PDF RichMedia',
+    description: 'Found /RichMedia which can contain Flash or other executable content',
+    severity: 'high'
   }
 ];
+
+const { calculateLineOffsets, getPositionFromOffset } = require('../utils');
 
 /**
  * Detect JavaScript injection in PDF content
@@ -73,6 +117,8 @@ const detectJsInjection = (content, options = {}) => {
     severityFilter.includes(pattern.severity)
   );
 
+  const lineOffsets = options.lineOffsets || calculateLineOffsets(content);
+
   // Check each pattern against the content
   patternsToCheck.forEach(patternDef => {
     const matches = [...content.matchAll(patternDef.pattern)];
@@ -83,10 +129,7 @@ const detectJsInjection = (content, options = {}) => {
       const endIndex = startIndex + matchedText.length;
       
       // Calculate line and column positions (approximate)
-      const contentBeforeMatch = content.substring(0, startIndex);
-      const lines = contentBeforeMatch.split('\n');
-      const lineNumber = lines.length;
-      const columnNumber = lines[lines.length - 1].length + 1;
+      const { line: lineNumber, column: columnNumber } = getPositionFromOffset(lineOffsets, startIndex);
       
       // Get context (text before and after the match)
       const contextStart = Math.max(0, startIndex - 20);
