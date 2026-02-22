@@ -32,7 +32,7 @@ describe('XSS Pattern Detector', () => {
   });
   
   test('should respect threshold settings', () => {
-    const content = '<div onclick="alert(1)">Click me</div>';
+    const content = '<div onclick="void(0)">Click me</div>';
     
     const lowResults = detectXssPatterns(content, { threshold: 'low' });
     const highResults = detectXssPatterns(content, { threshold: 'high' });

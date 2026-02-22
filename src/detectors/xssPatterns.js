@@ -54,6 +54,72 @@ const XSS_PATTERNS = [
     name: 'Timer Functions',
     description: 'Found setTimeout or setInterval that may execute code',
     severity: 'medium'
+  },
+  {
+    pattern: /\balert\s*\(/gi,
+    name: 'Alert Call',
+    description: 'Found alert() call that may indicate XSS payload execution',
+    severity: 'high'
+  },
+  {
+    pattern: /\b(confirm|prompt)\s*\(/gi,
+    name: 'Browser Dialog Call',
+    description: 'Found confirm() or prompt() call that may indicate XSS payload execution',
+    severity: 'high'
+  },
+  {
+    pattern: /\bwindow\s*\.\s*\w+/gi,
+    name: 'Window Property Access',
+    description: 'Found window.* property access that may indicate XSS (e.g. window.origin, window.location)',
+    severity: 'high'
+  },
+  {
+    pattern: /\bwindow\s*\[\s*['"][^'"]+['"]\s*\]/gi,
+    name: 'Window Bracket Access',
+    description: 'Found window["..."] bracket notation access that may indicate obfuscated XSS',
+    severity: 'high'
+  },
+  {
+    pattern: /\bdocument\s*\.\s*(URL|location|cookie|domain|referrer|documentURI)\b/gi,
+    name: 'Document Property Access',
+    description: 'Found access to sensitive document properties (URL, cookie, location, etc.)',
+    severity: 'high'
+  },
+  {
+    pattern: /\bdocument\s*\.\s*(createElement|createElementNS|execCommand)\s*\(/gi,
+    name: 'Document DOM Manipulation',
+    description: 'Found document DOM manipulation that may inject malicious elements',
+    severity: 'medium'
+  },
+  {
+    pattern: /\bPDFViewerApplication\b/gi,
+    name: 'PDF Viewer Application Access',
+    description: 'Found reference to PDFViewerApplication (PDF.js viewer object), commonly targeted in PDF XSS attacks',
+    severity: 'critical'
+  },
+  {
+    pattern: /\blocation\s*\.\s*(href|assign|replace|hash|search|pathname)\b/gi,
+    name: 'Location Manipulation',
+    description: 'Found location property access that may redirect or leak data',
+    severity: 'high'
+  },
+  {
+    pattern: /\b(fetch|XMLHttpRequest|ActiveXObject)\s*\(/gi,
+    name: 'Network Request',
+    description: 'Found network request API calls that may exfiltrate data',
+    severity: 'high'
+  },
+  {
+    pattern: /\bnavigator\s*\.\s*\w+/gi,
+    name: 'Navigator Access',
+    description: 'Found navigator property access that may fingerprint or exfiltrate browser info',
+    severity: 'medium'
+  },
+  {
+    pattern: /\bpostMessage\s*\(/gi,
+    name: 'PostMessage Call',
+    description: 'Found postMessage() call that may communicate with parent/opener windows',
+    severity: 'medium'
   }
 ];
 

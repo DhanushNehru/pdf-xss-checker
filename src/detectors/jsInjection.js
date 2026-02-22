@@ -90,6 +90,18 @@ const JS_INJECTION_PATTERNS = [
     name: 'PDF RichMedia',
     description: 'Found /RichMedia which can contain Flash or other executable content',
     severity: 'high'
+  },
+  {
+    pattern: /\/FontMatrix\s*\[(?=[^\]]*[('"])(?=[^\]]*(?:alert|window|document|eval|fetch|location))\s*/gi,
+    name: 'Suspicious FontMatrix',
+    description: 'Found /FontMatrix array with embedded code strings, a known PDF XSS vector',
+    severity: 'critical'
+  },
+  {
+    pattern: /\/(?:FontFile|CharProcs|ToUnicode|Encoding)\s*(?:<<|\[)(?=[^>\]]*(?:alert|window|document|eval|script))/gi,
+    name: 'Suspicious Font/Encoding Entry',
+    description: 'Found font or encoding entry with suspicious code patterns',
+    severity: 'high'
   }
 ];
 

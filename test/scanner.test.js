@@ -83,7 +83,7 @@ describe('PDF Scanner', () => {
     // Create mock buffers with different severity patterns
     const criticalBuffer = Buffer.from('malicious pdf content with eval("bad code")');
     const highBuffer = Buffer.from('malicious pdf content with <script>alert(1)</script>');
-    const mediumBuffer = Buffer.from('malicious pdf content with onclick="alert(1)"');
+    const mediumBuffer = Buffer.from('malicious pdf content with onclick="void(0)"');
     
     // Mock different responses based on content
     require('pdf-parse').mockImplementation((buffer) => {
@@ -95,7 +95,7 @@ describe('PDF Scanner', () => {
       } else if (content.includes('<script>')) {
         text = '<script>alert(1)</script>';
       } else if (content.includes('onclick')) {
-        text = '<div onclick="alert(1)">Click me</div>';
+        text = '<div onclick="void(0)">Click me</div>';
       }
       
       return Promise.resolve({
