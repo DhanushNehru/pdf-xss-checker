@@ -1,6 +1,6 @@
 {
   "name": "pdf-xss-checker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Node.js package to verify if PDFs contain XSS vulnerabilities",
   "main": "src/index.js",
   "bin": {
