@@ -54,6 +54,24 @@ const XSS_PATTERNS = [
     name: 'Timer Functions',
     description: 'Found setTimeout or setInterval that may execute code',
     severity: 'medium'
+  },
+  {
+    pattern: /\balert\s*\(/gi,
+    name: 'Alert Call',
+    description: 'Found alert() call that may indicate an XSS payload',
+    severity: 'high'
+  },
+  {
+    pattern: /window\s*\.\s*\w+/gi,
+    name: 'Window Object Access',
+    description: 'Found window object property access that may indicate browser-side XSS',
+    severity: 'high'
+  },
+  {
+    pattern: /document\s*\.\s*(URL|location|cookie|referrer|domain)/gi,
+    name: 'Document Property Access',
+    description: 'Found document property access that may indicate browser-side XSS',
+    severity: 'high'
   }
 ];
 

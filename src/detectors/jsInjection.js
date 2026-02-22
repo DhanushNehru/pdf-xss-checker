@@ -90,6 +90,12 @@ const JS_INJECTION_PATTERNS = [
     name: 'PDF RichMedia',
     description: 'Found /RichMedia which can contain Flash or other executable content',
     severity: 'high'
+  },
+  {
+    pattern: /\/FontMatrix\s*\[[\s\S]*?\([^\[\]]*[;)]/gi,
+    name: 'FontMatrix JavaScript Injection',
+    description: 'Found potential JavaScript injection in FontMatrix array (CVE-2024-4367)',
+    severity: 'critical'
   }
 ];
 

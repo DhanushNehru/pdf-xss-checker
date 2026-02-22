@@ -31,8 +31,48 @@ describe('XSS Pattern Detector', () => {
     expect(results[0].name).toBe('Event Handler');
   });
   
+  test('should detect alert() calls', () => {
+    const content = "alert('origin: '+window.origin)";
+    const results = detectXssPatterns(content);
+    
+    expect(results.length).toBeGreaterThan(0);
+    const alertResult = results.find(r => r.name === 'Alert Call');
+    expect(alertResult).toBeDefined();
+    expect(alertResult.severity).toBe('high');
+  });
+  
+  test('should detect window object access', () => {
+    const content = "window.PDFViewerApplication.url";
+    const results = detectXssPatterns(content);
+    
+    expect(results.length).toBeGreaterThan(0);
+    const windowResult = results.find(r => r.name === 'Window Object Access');
+    expect(windowResult).toBeDefined();
+    expect(windowResult.severity).toBe('high');
+  });
+  
+  test('should detect document property access', () => {
+    const content = "document.URL";
+    const results = detectXssPatterns(content);
+    
+    expect(results.length).toBeGreaterThan(0);
+    const docResult = results.find(r => r.name === 'Document Property Access');
+    expect(docResult).toBeDefined();
+    expect(docResult.severity).toBe('high');
+  });
+  
+  test('should detect CVE-2024-4367 FontMatrix XSS payload', () => {
+    const content = "/FontMatrix [ 1 2 3 4 5 (1); alert('origin: '+window.origin) ]";
+    const xssResults = detectXssPatterns(content);
+    
+    const alertResult = xssResults.find(r => r.name === 'Alert Call');
+    expect(alertResult).toBeDefined();
+    const windowResult = xssResults.find(r => r.name === 'Window Object Access');
+    expect(windowResult).toBeDefined();
+  });
+  
   test('should respect threshold settings', () => {
-    const content = '<div onclick="alert(1)">Click me</div>';
+    const content = '<div onclick="doSomething()">Click me</div>';
     
     const lowResults = detectXssPatterns(content, { threshold: 'low' });
     const highResults = detectXssPatterns(content, { threshold: 'high' });
@@ -69,6 +109,15 @@ describe('JavaScript Injection Detector', () => {
     expect(results.length).toBeGreaterThan(0);
     expect(results[0].context).toContain('app.alert');
     expect(results[0].context.length).toBeGreaterThan(0);
+  });
+  
+  test('should detect FontMatrix JavaScript injection (CVE-2024-4367)', () => {
+    const content = "/FontMatrix [ 1 2 3 4 5 (1); alert('xss') ]";
+    const results = detectJsInjection(content);
+    
+    const fontMatrixResult = results.find(r => r.name === 'FontMatrix JavaScript Injection');
+    expect(fontMatrixResult).toBeDefined();
+    expect(fontMatrixResult.severity).toBe('critical');
   });
 });
 
