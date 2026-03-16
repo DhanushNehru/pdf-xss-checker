@@ -162,6 +162,51 @@ The scan results include:
   ]
 }
 ```
+## Run with Docker
+1️⃣ Build the Docker image
+docker build -t pdf-xss-checker-example -f docker/Dockerfile .
+
+2️⃣ Generate sample PDFs
+
+If not already generated, create the example PDFs:
+npm install
+npm run generate-samples
+
+This will create two files:
+
+1. examples/sample1.pdf → clean PDF
+
+2. examples/sample2.pdf → contains a sample XSS payload
+
+3️⃣ Run the scanner on the sample PDFs
+For Linux / macOS
+
+Use $(pwd) to mount the current folder:
+
+docker run --rm -v "$(pwd)/examples:/examples" pdf-xss-checker-example node src/index.js /examples/sample1.pdf
+docker run --rm -v "$(pwd)/examples:/examples" pdf-xss-checker-example node src/index.js /examples/sample2.pdf
+
+🪟 Windows PowerShell
+
+Use ${PWD} for the current directory:
+
+docker run --rm -v "${PWD}\examples:/examples" pdf-xss-checker-example node src/index.js /examples/sample1.pdf
+docker run --rm -v "${PWD}\examples:/examples" pdf-xss-checker-example node src/index.js /examples/sample2.pdf
+
+🪟 Windows CMD
+
+Use %cd%:
+
+docker run --rm -v "%cd%\examples:/examples" pdf-xss-checker-example node src/index.js /examples/sample1.pdf
+docker run --rm -v "%cd%\examples:/examples" pdf-xss-checker-example node src/index.js /examples/sample2.pdf
+
+✅ Expected Output
+Scanning /examples/sample1.pdf ...
+✅ No XSS detected
+
+Scanning /examples/sample2.pdf ...
+⚠️ Potential XSS detected: <script>alert('XSS')</script>
+
 
 ## License
 
