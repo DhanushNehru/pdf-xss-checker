@@ -1,8 +1,6 @@
 # PDF XSS Checker
 
 [![npm version](https://img.shields.io/npm/v/pdf-xss-checker.svg?color=blue)](https://www.npmjs.com/package/pdf-xss-checker)
-[![npm downloads](https://img.shields.io/npm/dm/pdf-xss-checker.svg)](https://www.npmjs.com/package/pdf-xss-checker)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A Node.js package to verify if PDFs contain XSS (Cross-Site Scripting) vulnerabilities.
 
@@ -36,7 +34,7 @@ async function checkPdf() {
     const results = await pdfXssChecker.scanPdf('./document.pdf');
     
     if (results.success) {
-      console.log(`Safe to use: ${results.safeToUse ? 'Yes' : 'No'}`);
+      console.log(`Safe to use: ${results.summary.safeToUse ? 'Yes' : 'No'}`);
       console.log(`Found ${results.vulnerabilities.length} potential vulnerabilities`);
       
       // Print vulnerabilities
@@ -55,7 +53,8 @@ async function checkPdf() {
 async function checkBuffer(buffer) {
   try {
     const results = await pdfXssChecker.scanBuffer(buffer);
-    console.log(`PDF is safe to use: ${results.safeToUse}`);
+    if (!results.success) throw new Error(results.error);
+    console.log(`No findings: ${results.summary.safeToUse}`);
     return results;
   } catch (error) {
     console.error('Error scanning buffer:', error);
@@ -80,13 +79,13 @@ const results = await pdfXssChecker.scanPdf('./document.pdf', options);
 
 ```bash
 # Basic usage
-npx pdf-xss-check document.pdf
+npx --package=pdf-xss-checker pdf-xss-check document.pdf
 
 # With options
-npx pdf-xss-check document.pdf --threshold low --verbose --output results.json
+npx --package=pdf-xss-checker pdf-xss-check document.pdf --threshold low --verbose --output results.json
 
 # Help
-npx pdf-xss-check --help
+npx --package=pdf-xss-checker pdf-xss-check --help
 ```
 
 ## CLI Options
@@ -165,10 +164,16 @@ The scan results include:
 }
 ```
 
+## Limitations
+
+Findings are heuristic matches, not proof that a PDF is exploitable. No findings does not guarantee a PDF is safe. This tool does not sanitize PDFs or test the security of a PDF viewer. Treat untrusted PDFs as untrusted after scanning.
+
+The `safeToUse` value for a successful scan is in `results.summary.safeToUse`. A failed scan returns `success: false`; check that before reading the summary.
+
 ## Running Tests
 
 ```bash
-npm install
+npm ci
 npm test
 npm run lint
 ```

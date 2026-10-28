@@ -17,7 +17,7 @@ class WorkerPool {
   }
 
   addNewWorker() {
-    const worker = new Worker(path.join(__dirname, 'worker.js'), { stdout: false, stderr: false });
+    const worker = new Worker(path.join(__dirname, 'worker.js'));
     
     worker.on('message', (message) => {
       // Handle the message
@@ -76,7 +76,17 @@ class WorkerPool {
     const worker = this.idleWorkers.shift();
     
     worker.ref();
-    worker.postMessage(task.message);
+    try {
+      worker.postMessage(task.message);
+    } catch (error) {
+      // A cloning failure must not leave an idle worker referenced forever.
+      const callbackObj = this.callbacks.get(task.message.id);
+      this.callbacks.delete(task.message.id);
+      worker.unref();
+      this.idleWorkers.push(worker);
+      if (callbackObj) callbackObj.reject(error);
+      this.processNextTask();
+    }
   }
 
   runTask(buffer, options) {
