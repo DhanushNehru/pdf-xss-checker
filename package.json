@@ -11,7 +11,7 @@
     "lint": "eslint src/**/*.js",
     "start": "node src/index.js",
     "cli": "node bin/cli.js",
-    "demo": "node test.js"
+    "demo": "node examples/test.js"
   },
   "keywords": [
     "pdf",
@@ -38,5 +38,11 @@
   },
   "engines": {
     "node": ">=14.0.0"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/examples/"
+    ]
   }
 }
