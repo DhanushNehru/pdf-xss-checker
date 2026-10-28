@@ -1,6 +1,8 @@
 # PDF XSS Checker
 
 [![npm version](https://img.shields.io/npm/v/pdf-xss-checker.svg?color=blue)](https://www.npmjs.com/package/pdf-xss-checker)
+[![npm downloads](https://img.shields.io/npm/dm/pdf-xss-checker.svg)](https://www.npmjs.com/package/pdf-xss-checker)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A Node.js package to verify if PDFs contain XSS (Cross-Site Scripting) vulnerabilities.
 
@@ -162,6 +164,20 @@ The scan results include:
   ]
 }
 ```
+
+## Running Tests
+
+```bash
+npm install
+npm test
+npm run lint
+```
+
+The Jest suite covers the XSS, JavaScript injection and form injection detectors, the scanner, and the FontMatrix injection reproduction cases.
+
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the setup and pull request workflow, and check the open issues for good first contributions.
 
 ## License
 
