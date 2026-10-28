@@ -46,6 +46,7 @@ class WorkerPool {
         }
         
         // Return worker to pool
+        worker.unref();
         this.idleWorkers.push(worker);
         this.processNextTask();
       }
@@ -59,6 +60,9 @@ class WorkerPool {
       this.addNewWorker();
     });
 
+    // Let the process exit when no scan is running; ref() is called on dispatch
+    worker.unref();
+
     this.workers.push(worker);
     this.idleWorkers.push(worker);
   }
@@ -71,7 +75,18 @@ class WorkerPool {
     const task = this.taskQueue.shift();
     const worker = this.idleWorkers.shift();
     
-    worker.postMessage(task.message);
+    worker.ref();
+    try {
+      worker.postMessage(task.message);
+    } catch (error) {
+      // A cloning failure must not leave an idle worker referenced forever.
+      const callbackObj = this.callbacks.get(task.message.id);
+      this.callbacks.delete(task.message.id);
+      worker.unref();
+      this.idleWorkers.push(worker);
+      if (callbackObj) callbackObj.reject(error);
+      this.processNextTask();
+    }
   }
 
   runTask(buffer, options) {
