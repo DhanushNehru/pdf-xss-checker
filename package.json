@@ -7,7 +7,7 @@
     "pdf-xss-check": "./bin/cli.js"
   },
   "scripts": {
-    "test": "jest --testPathIgnorePatterns=test.js",
+    "test": "jest --testPathIgnorePatterns=/test\\.js$",
     "lint": "eslint src/**/*.js",
     "start": "node src/index.js",
     "cli": "node bin/cli.js",
@@ -24,7 +24,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DhanushNehru/pdf-xss-scanner"
+    "url": "https://github.com/DhanushNehru/pdf-xss-checker"
   },
   "dependencies": {
     "pdf-parse": "^1.1.1",
