@@ -17,7 +17,7 @@ class WorkerPool {
   }
 
   addNewWorker() {
-    const worker = new Worker(path.join(__dirname, 'worker.js'));
+    const worker = new Worker(path.join(__dirname, 'worker.js'), { stdout: false, stderr: false });
     
     worker.on('message', (message) => {
       // Handle the message
@@ -46,6 +46,7 @@ class WorkerPool {
         }
         
         // Return worker to pool
+        worker.unref();
         this.idleWorkers.push(worker);
         this.processNextTask();
       }
@@ -59,6 +60,9 @@ class WorkerPool {
       this.addNewWorker();
     });
 
+    // Let the process exit when no scan is running; ref() is called on dispatch
+    worker.unref();
+
     this.workers.push(worker);
     this.idleWorkers.push(worker);
   }
@@ -71,6 +75,7 @@ class WorkerPool {
     const task = this.taskQueue.shift();
     const worker = this.idleWorkers.shift();
     
+    worker.ref();
     worker.postMessage(task.message);
   }
 
