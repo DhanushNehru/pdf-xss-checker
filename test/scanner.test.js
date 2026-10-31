@@ -113,4 +113,38 @@ describe('PDF Scanner', () => {
     expect(highResults.riskLevel).toBe('high');
     expect(mediumResults.riskLevel).toBe('medium');
   });
+
+  
+  test('serializes concurrent PDF parsing to avoid shared parser state', async () => {
+    const parsePdf = require('pdf-parse');
+    let activeParses = 0;
+    let maxConcurrentParses = 0;
+
+    parsePdf.mockImplementation(async (buffer) => {
+      activeParses++;
+      maxConcurrentParses = Math.max(maxConcurrentParses, activeParses);
+      await new Promise(resolve => setTimeout(resolve, 10));
+      activeParses--;
+
+      return {
+        numpages: buffer.length,
+        info: {},
+        text: buffer.toString()
+      };
+    });
+
+    const buffers = Array.from({ length: 8 }, (_, index) => Buffer.from(`pdf-${index}`));
+    const results = await Promise.all(
+      buffers.map(buffer => scanPdfBuffer(buffer, { detectors: [] }))
+    );
+
+    expect(maxConcurrentParses).toBe(1);
+    expect(results.map(result => result.metadata.pageCount))
+      .toEqual(buffers.map(buffer => buffer.length));
+    expect(results.map(result => result.metadata.contentLength))
+      .toEqual(buffers.map(buffer =>
+        buffer.toString().length + '\n---RAW_PDF_CONTENT---\n'.length + buffer.length
+      ));
+  });
+
 });

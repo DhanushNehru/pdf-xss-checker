@@ -2,7 +2,7 @@
  * PDF XSS Scanner
  * Scans PDF content for XSS vulnerabilities
  */
-const pdfParse = require('pdf-parse');
+const pdfParse = require('./pdfParser');
 const { detectXssPatterns } = require('./detectors/xssPatterns');
 const { detectJsInjection } = require('./detectors/jsInjection');
 const { detectFormInjection } = require('./detectors/formInjection');
